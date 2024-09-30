@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>YouTube ToDo List</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-list"></i> All Ideas</a></li>
+                    <li><a href="{{ url_for('favorites') }}"><i class="fas fa-star"></i> Favorites</a></li>
+                    <li class="active"><a href="{{ url_for('archive') }}"><i class="fas fa-archive"></i> Archive</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <h2>Archived Ideas</h2>
+            </header>
+
+            <div class="video-ideas">
+                {% if video_ideas %}
+                    <ul class="idea-list">
+                        {% for idea, data in video_ideas.items() %}
+                            <li class="idea-item">
+                                <div class="idea-content">
+                                    <h3>{{ idea }}</h3>
+                                    <p>{{ data['script'][:100] }}{% if data['script']|length > 100 %}...{% endif %}</p>
+                                </div>
+                                <div class="idea-actions">
+                                    <form action="/archive/{{ idea }}" method="post">
+                                        <button type="submit" class="btn btn-icon"><i class="fas fa-archive {% if data['archived'] %}fas{% else %}far{% endif %}"></i></button>
+                                    </form>
+                                    <form action="/delete/{{ idea }}" method="post">
+                                        <button type="submit" class="btn btn-icon"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-ideas">No archived ideas yet.</p>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
