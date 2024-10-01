@@ -39,15 +39,32 @@ def add_idea():
     flash('Video idea added successfully!')
     return redirect(url_for('index'))
 
+@app.route('/view/<idea>')
+def view_idea(idea):
+    video_ideas = load_video_ideas()
+    if idea not in video_ideas:
+        flash('Idea not found!')
+        return redirect(url_for('index'))
+    
+    return render_template('view_idea.html', idea=idea, data=video_ideas[idea])
+
 @app.route('/edit/<idea>', methods=['GET', 'POST'])
 def edit_idea(idea):
     video_ideas = load_video_ideas()
+    if idea not in video_ideas:
+        flash('Idea not found!')
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         script = request.form.get('script')
+        if not script:
+            flash('Script cannot be empty!')
+            return render_template('edit.html', idea=idea, script=video_ideas[idea]['script'])
+
         video_ideas[idea]['script'] = script
         save_video_ideas(video_ideas)
         flash('Video idea updated successfully!')
-        return redirect(url_for('index'))
+        return redirect(url_for('view_idea', idea=idea))
     
     return render_template('edit.html', idea=idea, script=video_ideas[idea]['script'])
 
@@ -67,7 +84,7 @@ def favorite_idea(idea):
         video_ideas[idea]['favorite'] = not video_ideas[idea]['favorite']
         save_video_ideas(video_ideas)
         flash('Video idea updated successfully!')
-    return redirect(url_for('index'))
+    return redirect(url_for('view_idea', idea=idea))
 
 @app.route('/archive/<idea>', methods=['POST'])
 def archive_idea(idea):
@@ -76,7 +93,7 @@ def archive_idea(idea):
         video_ideas[idea]['archived'] = not video_ideas[idea]['archived']
         save_video_ideas(video_ideas)
         flash('Video idea updated successfully!')
-    return redirect(url_for('index'))
+    return redirect(url_for('view_idea', idea=idea))
 
 @app.route('/favorites')
 def favorites():
@@ -89,6 +106,10 @@ def archive():
     video_ideas = load_video_ideas()
     archived_ideas = {idea: data for idea, data in video_ideas.items() if data['archived']}
     return render_template('archive.html', video_ideas=archived_ideas)
+
+@app.template_filter('nl2br')
+def nl2br_filter(s):
+    return s.replace('\n', '<br>')
 
 if __name__ == '__main__':
     app.run(debug=True)
